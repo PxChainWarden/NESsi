@@ -4,12 +4,16 @@ class Bus;
 class Px6502CPU
 {
 private:
-    Bus cpuBus;
+    Bus* bus = nullptr;
     uint8_t a = 0x00;                        // Accumulator
     uint8_t x = 0x00, y =0x00;               // X and Y register
     uint16_t pc = 0x0000;                    // Program Counter
     uint8_t sp = 0x00;                       // Stack Pointer
     uint8_t status = 0x00;                   // Status Register
+
+    uint16_t memory_address = 0x0000;
+    uint8_t fethced_data = 0x00;
+
 
 
     // These are the Status Flags 6502 has. With an enum defined like this changing one specific flag will be easier
@@ -23,7 +27,15 @@ private:
         U = (1 << 5),                       // Unused
         V = (1 << 6),                       // Overflow
         N = (1 << 7),                       // Negative
-    }
+    };
+
+    // struct Instruction{
+    //     std::string instruction_name;
+    //     uint8_t ;
+    //     uint8_t cycles;
+    // }
+
+    // vector<struct Instruction> operations;
 
     
 
@@ -39,21 +51,29 @@ private:
     uint8_t ZPX();                          // Zero Page Indexed Access Mode (X register)
     uint8_t ZPY();                          // Zero Page Indexed Access Mode (Y register)
     uint8_t ABS();                          // Absolute Access Mode : Fetches the value from a 16-bit address anywhere in memory.
-    uint8_t ABX();                          // Absolute Indexed Access Mode (X register)
-    uint8_t ABY();                          // Absolute Indexed Access Mode (Y register)
+    uint8_t ABSX();                          // Absolute Indexed Access Mode (X register)
+    uint8_t ABSY();                          // Absolute Indexed Access Mode (Y register)
     uint8_t IND();                          // Indirect Access Mode : The JMP instruction has a special indirect addressing mode that can jump to the address stored in a 16-bit pointer anywhere in memory.
-    uint8_t INX();                          // Indexed Indirect Access Mode (X register)
-    uint8_t INY();                          // Indirect Indexed Access Mode (Y register)
+    uint8_t INDX();                          // Indexed Indirect Access Mode (X register)
+    uint8_t INDY();                          // Indirect Indexed Access Mode (Y register)
 
 
 public:
     Px6502CPU(/* args */);
     ~Px6502CPU();
 
-    void clock()
+    void clock();
 
-    // INSTRUCTIONS
-    // Details: https://www.nesdev.org/obelisk-6502-guide/reference.html
+    void connectBus(Bus* bus){
+        this->bus = bus;
+    }
+    
+    uint8_t read(uint16_t address);
+    void write(uint16_t address, uint8_t data);
+
+// INSTRUCTIONS
+// Details: https://www.nesdev.org/obelisk-6502-guide/reference.html
+private:
     uint8_t ADC();      // ADD with Carry
     uint8_t AND();      // Logical AND
     uint8_t ASL();      // Arithmetic Shift Left
@@ -74,7 +94,6 @@ public:
     uint8_t CMP();      // Compare
     uint8_t CPX();      // Compare X Register
     uint8_t CPY();      // Compare Y Register
-    uint8_t CPX();      // Compare X Register
     uint8_t DEC();      // Decrement Memory Value
     uint8_t DEX();      // Decrement X Register
     uint8_t DEY();      // Decrement Y Register
