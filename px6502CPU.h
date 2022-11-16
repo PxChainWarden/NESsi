@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <cstdint>
 class Bus;
 
 

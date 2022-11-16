@@ -6,8 +6,6 @@ Bus::Bus(/* args */)
 
     for(auto &i : this->memory)
         i = 0x00;
-    
-    this->memory[0x1234] = 0xFD;
 }
 
 Bus::~Bus()
