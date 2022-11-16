@@ -6,7 +6,7 @@ class Bus;
 
 class Px6502CPU
 {
-private:
+public:
     Bus* bus = nullptr;
     uint8_t a = 0x00;                        // Accumulator
     uint8_t x = 0x00, y =0x00;               // X and Y register
@@ -16,6 +16,7 @@ private:
 
     uint16_t effective_address = 0x0000;
     uint8_t fethced_data = 0x00;
+    uint8_t opcode = 0x00;
 
 
 
@@ -39,11 +40,16 @@ private:
         uint8_t cycles;
     };    
 
+private:
+    void setFlag(FLAGS flag, bool status);
+    uint8_t getFlag(FLAGS flag);
+
 // NES ADDRESSING MODES
 // NES uses different methods while accessing data from memory.
 // You can look it up more on https://www.nesdev.org/wiki/CPU_addressing_modes and 6502 CPU documents
 
-private:
+public:
+    uint8_t ACC();                          // Accumulator Access Mode : Many instructions can operate on the accumulator, e.g. LSR A. Some assemblers will treat no operand as an implicit A where applicable.
     uint8_t IMP();                          // Implictic Access Mode : Instructions like RTS or CLC have no address operand, the destination of results are implied.
     uint8_t IMM();                          // Immediate Access Mode : Uses the 8-bit operand itself as the value for the operation, rather than fetching a value from a memory address.
     uint8_t REL();                          // Relative Access Mode : Branch instructions (e.g. BEQ, BCS) have a relative addressing mode that specifies an 8-bit signed offset relative to the current PC.
@@ -51,11 +57,11 @@ private:
     uint8_t ZPX();                          // Zero Page Indexed Access Mode (X register)
     uint8_t ZPY();                          // Zero Page Indexed Access Mode (Y register)
     uint8_t ABS();                          // Absolute Access Mode : Fetches the value from a 16-bit address anywhere in memory.
-    uint8_t ABSX();                          // Absolute Indexed Access Mode (X register)
-    uint8_t ABSY();                          // Absolute Indexed Access Mode (Y register)
+    uint8_t ABSX();                         // Absolute Indexed Access Mode (X register)
+    uint8_t ABSY();                         // Absolute Indexed Access Mode (Y register)
     uint8_t IND();                          // Indirect Access Mode : The JMP instruction has a special indirect addressing mode that can jump to the address stored in a 16-bit pointer anywhere in memory.
-    uint8_t INDX();                          // Indexed Indirect Access Mode (X register)
-    uint8_t INDY();                          // Indirect Indexed Access Mode (Y register)
+    uint8_t INDX();                         // Indexed Indirect Access Mode (X register)
+    uint8_t INDY();                         // Indirect Indexed Access Mode (Y register)
 
 
 public:
@@ -76,7 +82,7 @@ public:
 
 // INSTRUCTIONS
 // Details: https://www.nesdev.org/obelisk-6502-guide/reference.html
-private:
+public:
     uint8_t ADC();      // ADD with Carry
     uint8_t AND();      // Logical AND
     uint8_t ASL();      // Arithmetic Shift Left
