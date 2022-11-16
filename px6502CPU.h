@@ -14,7 +14,7 @@ private:
     uint8_t sp = 0x00;                       // Stack Pointer
     uint8_t status = 0x00;                   // Status Register
 
-    uint16_t memory_address = 0x0000;
+    uint16_t effective_address = 0x0000;
     uint8_t fethced_data = 0x00;
 
 
@@ -34,13 +34,10 @@ private:
 
     struct Instruction{
         std::string instruction_name;
-        uint8_t (Px6502CPU::*pOperationFunction) = nullptr;
-        uint8_t (Px6502CPU::*pAddressingFunction) = nullptr;
+        uint8_t (Px6502CPU::*pOperationFunction)(void);
+        uint8_t (Px6502CPU::*pAddressingFunction)(void);
         uint8_t cycles;
-    };
-
-    std::map<uint8_t,struct Instruction> operationLookup;
-    
+    };    
 
 // NES ADDRESSING MODES
 // NES uses different methods while accessing data from memory.
@@ -73,6 +70,9 @@ public:
     
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t data);
+    void fetch();
+    std::map<uint8_t,Instruction> operationLookup;
+
 
 // INSTRUCTIONS
 // Details: https://www.nesdev.org/obelisk-6502-guide/reference.html
