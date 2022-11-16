@@ -1,6 +1,7 @@
 #include "Bus.h"
 #include <iostream>
 #include <stdio.h>
+#include <bitset>
 
 int main(){
     Bus bus;
@@ -24,10 +25,11 @@ int main(){
     printf("Addressing Mode ZP0 called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
     bus.cpu.AND();
     printf("Instruction AND called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
-    printf("After program runs Accumulator should be 0x21, is it correct?");
+    printf("After program runs Accumulator should be 0x21, is it correct?\n");
+    std::bitset<8> x(bus.cpu.status);
+    std::cout << "Status Flag: " << std::bitset<8>(bus.cpu.status) << std::endl;
     // std::cout << std::hex << bus.cpu.a;
     // std::cout << std::hex << (int)bus.cpu.read(0x00FF) << std::endl;
     // std::cout << "Instruction:" << std::endl << bus.cpu.operationLookup[bus.cpu.read(0x00FF)].instruction_name << std::endl;
-
     return 0;
 }

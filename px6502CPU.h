@@ -41,7 +41,7 @@ public:
     };    
 
 private:
-    void setFlag(FLAGS flag, bool status);
+    void setFlag(FLAGS flag, bool s);
     uint8_t getFlag(FLAGS flag);
 
 // NES ADDRESSING MODES

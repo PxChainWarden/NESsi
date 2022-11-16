@@ -1,5 +1,5 @@
 #include "Bus.h"
-
+#include <iostream>
 
 Px6502CPU::Px6502CPU(/* args */)
 {
@@ -107,8 +107,9 @@ void Px6502CPU::clock(){
 
 }
 
-void Px6502CPU::setFlag(FLAGS flag, bool status){
-    if(status){
+void Px6502CPU::setFlag(FLAGS flag, bool s){
+    if(s){
+        std::cout << s << std::endl << flag << std::endl;
         status |= flag;             // Set flag in status register. Flag is always 1 on correct bit location. Example (0b01000000)
                                     // Doing an OR operation with flag will always set the flag.
     }else{
