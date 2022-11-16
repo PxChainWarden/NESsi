@@ -1,3 +1,5 @@
+#include <string>
+#include <map>
 class Bus;
 
 
@@ -29,14 +31,14 @@ private:
         N = (1 << 7),                       // Negative
     };
 
-    // struct Instruction{
-    //     std::string instruction_name;
-    //     uint8_t ;
-    //     uint8_t cycles;
-    // }
+    struct Instruction{
+        std::string instruction_name;
+        uint8_t (Px6502CPU::*pOperationFunction) = nullptr;
+        uint8_t (Px6502CPU::*pAddressingFunction) = nullptr;
+        uint8_t cycles;
+    };
 
-    // vector<struct Instruction> operations;
-
+    std::map<uint8_t,struct Instruction> operationLookup;
     
 
 // NES ADDRESSING MODES
