@@ -280,15 +280,22 @@ uint8_t Px6502CPU::IMP(){
 
 // Immediate Addressing mode
 // Uses the 8-bit operand itself as the value for the operation, rather than fetching a value from a memory address. 
-// So we set the effective address to the operands location. And increase the program counter to continue the process 
+// So we set the effective address to the operands location. And increase the program counter to continue the process
+// Source: https://slark.me/c64-downloads/6502-addressing-modes.pdf, https://www.nesdev.org/wiki/CPU_addressing_modes 
 uint8_t Px6502CPU::IMM(){
     effective_address = pc;
     pc++;
     return 0;
 }
 
+// Relative Addressing mode
+// The operand $aa is added to the LSB of the PC as an offset, with a range of $-80 to $+7F.
+// Source: https://slark.me/c64-downloads/6502-addressing-modes.pdf, https://www.nesdev.org/wiki/CPU_addressing_modes
 uint8_t Px6502CPU::REL(){
-
+    // Using Signed Integer as relative addressing.
+    int8_t operand = read(pc);
+    pc++;
+    relative_address = operand;
     return 0;
 }
 
@@ -437,14 +444,46 @@ uint8_t Px6502CPU::INDY(){
 uint8_t Px6502CPU::fetch(){
     if( operationLookup[opcode].pAddressingFunction != &Px6502CPU::IMP )
         return read(effective_address);
+    return 0x00;
 }
 
 // =========================================== INSTRUCTIONS ===========================================
 // Instruction Set for MOS 6502 CPU
 // More details can be found here: https://www.nesdev.org/obelisk-6502-guide/reference.html
 
+// Adding with carry
+// More Details: https://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
 uint8_t Px6502CPU::ADC(){
+    fethced_data = read(effective_address);
 
+    uint8_t temp = a + fethced_data + getFlag(C);
+
+    bool accumulatorSignBit = a & (0b10000000);                 // Get Bit 7 of the Accumulator
+    bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
+
+    bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
+
+    std::cout << (fethedDataSignBit) << " " << (accumulatorSignBit) << " " << tempDataSignBit <<  std::endl;
+
+    // Set Overflow Truth Table
+
+    // fethedDataSignBit | accumulatorSignBit | tempDataSignBit |  Overflow Status
+    //        0          |          0         |         0       |         0
+    //        0          |          0         |         1       |         1
+    //        0          |          1         |         0       |         0
+    //        0          |          1         |         1       |         0
+    //        1          |          0         |         0       |         0
+    //        1          |          0         |         1       |         0
+    //        1          |          1         |         0       |         1
+    //        1          |          1         |         1       |         0
+    setFlag(V, (fethedDataSignBit == accumulatorSignBit) and (tempDataSignBit != accumulatorSignBit) );
+
+    setFlag(C, temp < (a + fethced_data));
+
+    a = temp;
+    
+    setFlag(N, (a & 0b10000000) > 0);
+    setFlag(Z, a == 0x00);
 
     return 0;
 }
@@ -457,46 +496,159 @@ uint8_t Px6502CPU::AND(){
 }
 
 uint8_t Px6502CPU::ASL(){
+    // Read data from memory if addressing mode is not accumulator.
+    // Accumulator addressing mode function will set fetched data to value of Accumulator.
+    if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
+        fethced_data = read(effective_address);
+    else
+        fethced_data = a;
+    
+    setFlag(C,fethced_data & 0b10000000);             // Set Carry Flag to the Bit 7 of the Data
+    
+    uint8_t temp = fethced_data << 1;
+    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if loaded data after operation is 0
+    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if bit 7 is set
+
+    if(operationLookup[opcode].pAddressingFunction == &Px6502CPU::ACC)
+        a = temp;
+    else
+        write(effective_address,temp);
+
     return 0;
 }
 
 uint8_t Px6502CPU::BCC(){
+    if(getFlag(C) == 0x00){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BCS(){
+    if(getFlag(C) > 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BEQ(){
+    if(getFlag(Z) > 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BIT(){
+    fethced_data = read(effective_address);
+    uint8_t temp = a & fethced_data;
+    setFlag(Z, temp == 0x00);
+    setFlag(N,(fethced_data & 0b10000000) > 0);
+    setFlag(V,(fethced_data & 0b01000000) > 0);
     return 0;
 }
 
 uint8_t Px6502CPU::BMI(){
+    if(getFlag(N) > 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BNE(){
+    if(getFlag(Z) == 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BPL(){
+    if(getFlag(N) == 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BRK(){
+    uint8_t MSB = pc >> 8;
+    uint8_t LSB = pc & 0x00FF;
+
+    setFlag(B,true);
+
+    write(0x0100 + sp, MSB);
+    sp--;
+    write(0x0100 + sp, LSB);
+    sp--;
+
+    write(0x0100 + sp, status);
+    sp--;
+
+    LSB = read(0xFFFE);
+    MSB = read(0xFFFF);
+
+    pc = (MSB << 8) + LSB; 
+
     return 0;
 }
 
 uint8_t Px6502CPU::BVC(){
+    if(getFlag(V) == 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
 uint8_t Px6502CPU::BVS(){
+    if(getFlag(V) > 0){
+        uint16_t newProgramCounter = pc + relative_address;
+        if( (pc & 0xFF00) != (newProgramCounter & 0xFF00) ){
+            pc = newProgramCounter;
+            return 2;
+        }
+        pc = newProgramCounter;
+        return 1;
+    }
     return 0;
 }
 
@@ -650,6 +802,8 @@ uint8_t Px6502CPU::LSR(){
     // Accumulator addressing mode function will set fetched data to value of Accumulator.
     if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
         fethced_data = read(effective_address);
+    else
+        fethced_data = a;
     
     setFlag(C,fethced_data & 0b00000001);             // Set Carry Flag to the Bit 0 of the Data
     
@@ -708,6 +862,8 @@ uint8_t Px6502CPU::ROL(){
     // Accumulator addressing mode function will set fetched data to value of Accumulator.
     if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
         fethced_data = read(effective_address);
+    else
+        fethced_data = a;
 
     uint8_t temp = fethced_data << 1;
     temp += getFlag(C) > 0 ? 1 : 0;
@@ -725,18 +881,87 @@ uint8_t Px6502CPU::ROL(){
 }
 
 uint8_t Px6502CPU::ROR(){
+    // Read data from memory if addressing mode is not accumulator.
+    // Accumulator addressing mode function will set fetched data to value of Accumulator.
+    if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
+        fethced_data = read(effective_address);
+    else
+        fethced_data = a;
+
+    uint8_t temp = fethced_data >> 1;
+    temp += getFlag(C) > 0 ? 128 : 0;
+    
+    setFlag(C,fethced_data & 0b00000001);             // Set Carry Flag to the Bit 7 of the Data
+    
+    
+    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if bit 7 is set
+    if(operationLookup[opcode].pAddressingFunction == &Px6502CPU::ACC)
+        a = temp;
+    else
+        write(effective_address,temp);
     return 0;
 }
 
 uint8_t Px6502CPU::RTI(){
+    setFlag(B,false);
+    
+    sp++;
+    status = read(0x0100 + sp);
+    sp++;
+    uint8_t LSB = read(0x0100 + sp);
+    sp++;
+    uint8_t MSB  = read(0x0100 + sp);
+
+    pc = (MSB << 8) + LSB; 
+
     return 0;
 }
 
 uint8_t Px6502CPU::RTS(){
+    // Everyting in page 1 is considered stack in 6502.
+    // Read the stored Program Counter from Stack. LSB first
+
+    sp++;
+    uint8_t LSB = read(0x0100 + sp);
+    sp++;
+    uint8_t MSB = read(0x0100 + sp);
+
+    pc = (MSB << 8) + LSB - 1;
     return 0;
 }
 
 uint8_t Px6502CPU::SBC(){
+    fethced_data = read(effective_address);
+    uint8_t temp = a - fethced_data - (1 - getFlag(C));
+
+    bool accumulatorSignBit = a & (0b10000000);                 // Get Bit 7 of the Accumulator
+    bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
+
+    bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
+
+    std::cout << (fethedDataSignBit) << " " << (accumulatorSignBit) << " " << tempDataSignBit <<  std::endl;
+
+    // Set Overflow Truth Table for Substract
+
+    // fethedDataSignBit | accumulatorSignBit | tempDataSignBit |  Overflow Status
+    //        0          |          0         |         0       |         0
+    //        0          |          0         |         1       |         0
+    //        0          |          1         |         0       |         0
+    //        0          |          1         |         1       |         1
+    //        1          |          0         |         0       |         1
+    //        1          |          0         |         1       |         0
+    //        1          |          1         |         0       |         0
+    //        1          |          1         |         1       |         0
+    setFlag(V, (fethedDataSignBit != accumulatorSignBit) and (tempDataSignBit == accumulatorSignBit) );
+
+    setFlag(C, temp > (a + fethced_data));
+
+    a = temp;
+    
+    setFlag(N, (a & 0b10000000) > 0);
+    setFlag(Z, a == 0x00);
+
     return 0;
 }
 

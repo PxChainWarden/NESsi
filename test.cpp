@@ -14,8 +14,8 @@ int main(){
     printf("Address 0x00F9, Data 0x69\n");
     bus.cpu.write(0x0000,0xFF);
     bus.cpu.write(0x0001,0xF9);
-    bus.cpu.write(0x00FF,0x31);
-    bus.cpu.write(0x00F9,0x69);
+    bus.cpu.write(0x00FF,0x7F);
+    bus.cpu.write(0x00F9,0xFF);
     printf("Program Counter Starts At: 0x%x\n",bus.cpu.pc);
     bus.cpu.ZP0();
     printf("Addressing Mode ZP0 called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
@@ -23,9 +23,9 @@ int main(){
     printf("Instruction LDA called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
     bus.cpu.ZP0();
     printf("Addressing Mode ZP0 called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
-    bus.cpu.AND();
-    printf("Instruction AND called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
-    printf("After program runs Accumulator should be 0x21, is it correct?\n");
+    bus.cpu.SBC();
+    printf("Instruction SBC called:\n\tProgram Counter: 0x%x\n\tEffective Address: 0x%x\n\tAccumulator: 0x%x\n",bus.cpu.pc,bus.cpu.effective_address,bus.cpu.a);
+    // printf("After program runs Accumulator should be 0x21, is it correct?\n");
     std::bitset<8> x(bus.cpu.status);
     std::cout << "Status Flag: " << std::bitset<8>(bus.cpu.status) << std::endl;
     // std::cout << std::hex << bus.cpu.a;

@@ -15,8 +15,10 @@ public:
     uint8_t status = 0x00;                   // Status Register
 
     uint16_t effective_address = 0x0000;
+    int8_t relative_address = 0x00;
     uint8_t fethced_data = 0x00;
     uint8_t opcode = 0x00;
+
 
 
 
