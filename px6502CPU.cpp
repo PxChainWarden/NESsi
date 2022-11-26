@@ -229,11 +229,14 @@ Px6502CPU::~Px6502CPU()
 {
 }
 
-
+// A Read Memory function for CPU.
+// If addressing mode is Accumulator it returns the accumulator
+// Else returns the data at given address 
 uint8_t Px6502CPU::read(uint16_t address){
-    return bus->read(address);
+        return bus->read(address);
 }
 
+// A Write Memory function for CPU
 void Px6502CPU::write(uint16_t address,uint8_t data){
     bus->write(address,data);
 }
@@ -431,9 +434,9 @@ uint8_t Px6502CPU::INDY(){
 }
 
 // A function for fetching data after effective address is set by the Addressing Mode
-void Px6502CPU::fetch(){
+uint8_t Px6502CPU::fetch(){
     if( operationLookup[opcode].pAddressingFunction != &Px6502CPU::IMP )
-        fethced_data = read(effective_address);
+        return read(effective_address);
 }
 
 // =========================================== INSTRUCTIONS ===========================================
@@ -442,15 +445,14 @@ void Px6502CPU::fetch(){
 
 uint8_t Px6502CPU::ADC(){
 
+
     return 0;
 }
 
 uint8_t Px6502CPU::AND(){
     a = a & read(effective_address);
-    if(a == 0x00)
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);
+    setFlag(N,(a & 0b10000000) > 0);
     return 0;
 }
 
@@ -520,36 +522,25 @@ uint8_t Px6502CPU::CLV(){
 
 uint8_t Px6502CPU::CMP(){
     uint8_t compare = a - read(effective_address);
-    if(compare == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (compare & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
-    if (a >= read(effective_address))     // Set Carry Flag if Accumulator is greater than Memory Data
-        setFlag(C,true);
-    return 0;
+    setFlag(Z, compare == 0x00);                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (compare & 0b10000000) > 0);       // Set Negative Flag if bit 7 is set
+    setFlag(C, a >= read(effective_address));     // Set Carry Flag if Accumulator is greater than Memory Data
     return 0;
 }
 
 uint8_t Px6502CPU::CPX(){
     uint8_t compare = x - read(effective_address);
-    if(compare == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (compare & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
-    if (x >= read(effective_address))     // Set Carry Flag if X Register is greater than Memory Data
-        setFlag(C,true);
-    return 0;
+    setFlag(Z, compare == 0x00);                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (compare & 0b10000000) > 0);       // Set Negative Flag if bit 7 is set
+    setFlag(C, x >= read(effective_address));     // Set Carry Flag if X Register is greater than Memory Data
     return 0;
 }
 
 uint8_t Px6502CPU::CPY(){
     uint8_t compare = y - read(effective_address);
-    if(compare == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (compare & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
-    if (y >= read(effective_address))     // Set Carry Flag if Y Register is greater than Memory Data
-        setFlag(C,true);
+    setFlag(Z, compare == 0x00);                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (compare & 0b10000000) > 0);       // Set Negative Flag if bit 7 is set
+    setFlag(C, y >= read(effective_address));     // Set Carry Flag if Y Register is greater than Memory Data
     return 0;
 }
 
@@ -557,37 +548,29 @@ uint8_t Px6502CPU::DEC(){
     fethced_data = read(effective_address);
     fethced_data--;
     write(effective_address,fethced_data);
-    if(fethced_data == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (fethced_data & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, fethced_data == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (fethced_data & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::DEX(){
     x--;
-    if(x == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (x & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, x == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (x & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::DEY(){
     y--;
-    if(y == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (y & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, y == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (y & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::EOR(){
     a = a ^ read(effective_address);
-    if(a == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
@@ -595,46 +578,51 @@ uint8_t Px6502CPU::INC(){
     fethced_data = read(effective_address);
     fethced_data++;
     write(effective_address,fethced_data);
-    if(fethced_data == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (fethced_data & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, fethced_data == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (fethced_data & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::INX(){
     x++;
-    if(x == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (x & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, x == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (x & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::INY(){
     y++;
-    if(y == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (y & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, y == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (y & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::JMP(){
+    pc = effective_address;
     return 0;
 }
 
 uint8_t Px6502CPU::JSR(){
+    pc--;
+    // Everyting in page 1 is considered stack in 6502.
+    // Store Program Counter to Stack. MSB first
+    uint8_t MSB = pc >> 8;
+    uint8_t LSB = pc & 0x00FF;
+
+    write(0x0100 + sp, MSB);
+    sp--;
+    write(0x0100 + sp, LSB);
+    sp--;
+
+    pc = effective_address;
     return 0;
 }
 
 uint8_t Px6502CPU::LDA(){
     a = read(effective_address);
 
-    if(a == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
 
     return 0;
 }
@@ -642,10 +630,8 @@ uint8_t Px6502CPU::LDA(){
 uint8_t Px6502CPU::LDX(){
     x = read(effective_address);
 
-    if(x == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (x & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, x == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (x & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
 
     return 0;
 }
@@ -653,16 +639,29 @@ uint8_t Px6502CPU::LDX(){
 uint8_t Px6502CPU::LDY(){
     y = read(effective_address);
 
-    if(y == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (y & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, y == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N,  (y & 0b10000000) > 0);       // Set Negative Flag if bit 7 is set
 
     return 0;
 }
 
 uint8_t Px6502CPU::LSR(){
+    // Read data from memory if addressing mode is not accumulator.
+    // Accumulator addressing mode function will set fetched data to value of Accumulator.
+    if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
+        fethced_data = read(effective_address);
     
+    setFlag(C,fethced_data & 0b00000001);             // Set Carry Flag to the Bit 0 of the Data
+    
+    uint8_t temp = fethced_data >> 1;
+    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if bit 7 is set
+
+    if(operationLookup[opcode].pAddressingFunction == &Px6502CPU::ACC)
+        a = temp;
+    else
+        write(effective_address,temp);
+
     return 0;
 }
 
@@ -672,30 +671,56 @@ uint8_t Px6502CPU::NOP(){
 
 uint8_t Px6502CPU::ORA(){
     a = a | read(effective_address);
-    if(a == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::PHA(){
+    write(0x0100 + sp, a);
+    sp--;
     return 0;
 }
 
 uint8_t Px6502CPU::PHP(){
+    write(0x0100 + sp, status);
+    sp--;
     return 0;
 }
 
 uint8_t Px6502CPU::PLA(){
+    sp++;
+    a = read(0x0100 + sp);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::PLP(){
+    sp++;
+    status = read(0x0100 + sp);
     return 0;
 }
 
+// TODO Maybe needs a fix
 uint8_t Px6502CPU::ROL(){
+    // Read data from memory if addressing mode is not accumulator.
+    // Accumulator addressing mode function will set fetched data to value of Accumulator.
+    if(operationLookup[opcode].pAddressingFunction != &Px6502CPU::ACC)
+        fethced_data = read(effective_address);
+
+    uint8_t temp = fethced_data << 1;
+    temp += getFlag(C) > 0 ? 1 : 0;
+    
+    setFlag(C,fethced_data & 0b10000000);             // Set Carry Flag to the Bit 7 of the Data
+    
+    
+    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if loaded data is 0
+    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if bit 7 is set
+    if(operationLookup[opcode].pAddressingFunction == &Px6502CPU::ACC)
+        a = temp;
+    else
+        write(effective_address,temp);
     return 0;
 }
 
@@ -747,37 +772,29 @@ uint8_t Px6502CPU::STY(){
 
 uint8_t Px6502CPU::TAX(){
     x = a;
-    if(x == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (x & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, x == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (x & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::TAY(){
     y = a;
-    if(y == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (y & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, y == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (y & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::TSX(){
     x = sp;
-    if(x == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (x & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, x == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (x & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
 uint8_t Px6502CPU::TXA(){
     a = x;
-    if(a == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }
 
@@ -788,9 +805,7 @@ uint8_t Px6502CPU::TXS(){
 
 uint8_t Px6502CPU::TYA(){
     a = y;
-    if(a == 0x00)                   // Set Zero Flag if loaded data is 0
-        setFlag(Z,true);
-    if( (a & 0b10000000) > 0)       // Set Negative Flag if bit 7 is set
-        setFlag(N,true);
+    setFlag(Z, a == 0x00);                   // Set Zero Flag if loaded data is 0
+    setFlag(N, (a & 0b10000000) > 0);        // Set Negative Flag if bit 7 is set
     return 0;
 }

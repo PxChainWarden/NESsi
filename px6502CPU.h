@@ -76,7 +76,7 @@ public:
     
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t data);
-    void fetch();
+    uint8_t fetch();
     std::map<uint8_t,Instruction> operationLookup;
 
 
