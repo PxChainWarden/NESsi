@@ -255,6 +255,13 @@ void Px6502CPU::clock(){
 
 }
 
+void Px6502CPU::clockByInstruction(){
+    do{
+        clock();
+    }
+    while(cycles > 0);
+}
+
 void Px6502CPU::setFlag(FLAGS flag, bool s){
     if(s){
         // std::cout << s << std::endl << flag << std::endl;

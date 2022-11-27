@@ -72,6 +72,7 @@ public:
     ~Px6502CPU();
 
     void clock();
+    void clockByInstruction();
 
     void connectBus(Bus* bus){
         this->bus = bus;
