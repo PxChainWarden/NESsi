@@ -242,12 +242,22 @@ void Px6502CPU::write(uint16_t address,uint8_t data){
 }
 
 void Px6502CPU::clock(){
+    if(cycles == 0){
+        opcode = read(pc);
+        pc++;
+        cycles = operationLookup[opcode].cycles;
+
+        cycles += (this->*operationLookup[opcode].pAddressingFunction)();
+        cycles += (this->*operationLookup[opcode].pOperationFunction)();
+    }
+
+    cycles--;
 
 }
 
 void Px6502CPU::setFlag(FLAGS flag, bool s){
     if(s){
-        std::cout << s << std::endl << flag << std::endl;
+        // std::cout << s << std::endl << flag << std::endl;
         status |= flag;             // Set flag in status register. Flag is always 1 on correct bit location. Example (0b01000000)
                                     // Doing an OR operation with flag will always set the flag.
     }else{
@@ -462,8 +472,6 @@ uint8_t Px6502CPU::ADC(){
     bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
 
     bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
-
-    std::cout << (fethedDataSignBit) << " " << (accumulatorSignBit) << " " << tempDataSignBit <<  std::endl;
 
     // Set Overflow Truth Table
 
@@ -939,8 +947,6 @@ uint8_t Px6502CPU::SBC(){
     bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
 
     bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
-
-    std::cout << (fethedDataSignBit) << " " << (accumulatorSignBit) << " " << tempDataSignBit <<  std::endl;
 
     // Set Overflow Truth Table for Substract
 

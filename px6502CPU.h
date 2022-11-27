@@ -18,6 +18,7 @@ public:
     int8_t relative_address = 0x00;
     uint8_t fethced_data = 0x00;
     uint8_t opcode = 0x00;
+    uint8_t cycles = 0x00;
 
 
 
