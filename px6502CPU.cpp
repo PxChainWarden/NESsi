@@ -274,9 +274,88 @@ void Px6502CPU::clockByInstruction(){
     while(cycles > 0);
 }
 
+// Reset the CPU state
+// Sets the registers to 0, sets Status Flags 0 except Unused
+// Load Program Counter from Vector Pointer $FFFC and $FFFD
 void Px6502CPU::reset(){
-    sp -= 3;
+    // Read the New Program Counter from Vector 
+    // read($FFFC) -> PC LSB, read($FFFD) -> PC MSB
+    uint8_t LSB = read(0xFFFC);
+    uint8_t MSB = read(0xFFFD);
+
+    pc = (MSB << 8) + LSB;
+
+    // Reset the Registers
+    a = 0;
+    x = 0;
+    y = 0;
+    sp = 0xFD;
+    status = 0;
+    setFlag(U,true);
+
+    // Also reset other variables
+    relative_address = 0;
+    effective_address = 0;
+    fethced_data = 0;
+
+    // Reset takes some time
+    cycles = 8;
+}
+
+
+// Interrup Request
+// Source: http://archive.6502.org/datasheets/synertek_programming_manual.pdf
+void Px6502CPU::irq(){
+    // Check If interrupts are allowed
+    if(getFlag(I) == 0){
+        // Push program counter to Stack. MSB first.
+        write(0x0100 + sp, pc >> 8);
+        sp--;
+        write(0x0100 + sp, pc & 0x00FF);
+        sp--;
+
+        // Push the Status Register to Stack
+        setFlag(B, false);
+        setFlag(U,true);
+        setFlag(I,true);
+        write(0x0100 + sp, status);
+        sp--;
+
+        // Read the New Program Counter from Vector 
+        // read($FFFE) -> PC LSB, read($FFFF) -> PC MSB
+        uint8_t LSB = read(0xFFFE);
+        uint8_t MSB = read(0xFFFF);
+
+        pc = (MSB << 8) + LSB;
+
+        cycles = 7;
+    }
+}
+
+// Non Maskable Interrupt can not be ignored. Behaves same as IRQ but its Vector Pointer is in address $FFFA and $FFFB
+void Px6502CPU::nmi(){
+    // Push program counter to Stack. MSB first.
+    write(0x0100 + sp, pc >> 8);
+    sp--;
+    write(0x0100 + sp, pc & 0x00FF);
+    sp--;
+    
+    // Push the Status Register to Stack
+    setFlag(B, false);
+    setFlag(U,true);
     setFlag(I,true);
+    write(0x0100 + sp, status);
+    sp--;
+    
+    // Read the New Program Counter from Vector 
+    // read($FFFA) -> PC LSB, read($FFFB) -> PC MSB
+    uint8_t LSB = read(0xFFFA);
+    uint8_t MSB = read(0xFFFB);
+    
+    pc = (MSB << 8) + LSB;
+    
+    cycles = 8;
+
 }
 
 void Px6502CPU::setFlag(FLAGS flag, bool s){

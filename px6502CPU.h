@@ -77,6 +77,7 @@ public:
     void clockByInstruction();
     void reset();
     void irq();
+    void nmi();
 
     void connectBus(Bus* bus){
         this->bus = bus;
