@@ -19,6 +19,7 @@ public:
     uint8_t fethced_data = 0x00;
     uint8_t opcode = 0x00;
     uint8_t cycles = 0x00;
+    uint64_t total_cycle_count = 0;
 
 
 
@@ -41,6 +42,7 @@ public:
         uint8_t (Px6502CPU::*pOperationFunction)(void);
         uint8_t (Px6502CPU::*pAddressingFunction)(void);
         uint8_t cycles;
+        bool canHaveAdditionalCycles;
     };    
 
 private:
@@ -51,7 +53,7 @@ private:
 // NES uses different methods while accessing data from memory.
 // You can look it up more on https://www.nesdev.org/wiki/CPU_addressing_modes and 6502 CPU documents
 
-public:
+private:
     uint8_t ACC();                          // Accumulator Access Mode : Many instructions can operate on the accumulator, e.g. LSR A. Some assemblers will treat no operand as an implicit A where applicable.
     uint8_t IMP();                          // Implictic Access Mode : Instructions like RTS or CLC have no address operand, the destination of results are implied.
     uint8_t IMM();                          // Immediate Access Mode : Uses the 8-bit operand itself as the value for the operation, rather than fetching a value from a memory address.
@@ -73,6 +75,8 @@ public:
 
     void clock();
     void clockByInstruction();
+    void reset();
+    void irq();
 
     void connectBus(Bus* bus){
         this->bus = bus;
@@ -86,7 +90,7 @@ public:
 
 // INSTRUCTIONS
 // Details: https://www.nesdev.org/obelisk-6502-guide/reference.html
-public:
+private:
     uint8_t ADC();      // ADD with Carry
     uint8_t AND();      // Logical AND
     uint8_t ASL();      // Arithmetic Shift Left

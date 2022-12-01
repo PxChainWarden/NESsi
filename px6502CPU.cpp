@@ -7,222 +7,224 @@ Px6502CPU::Px6502CPU(/* args */)
     // Map< opcode, Instruction>
     // opcode -> {Instruction Name, Instructuin Function Pointer, Address Mode Function Pointer, Cycle Count}
     operationLookup = {
-        // ADD with Carry
-        {0x69, {"ADC",&Px6502CPU::ADC,&Px6502CPU::IMM,2}},
-        {0x65, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ZP0,3}},
-        {0x75, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ZPX,4}},
-        {0x6D, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABS,4}},
-        {0x7D, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABSX,4}},
-        {0x79, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABSY,4}},
-        {0x61, {"ADC",&Px6502CPU::ADC,&Px6502CPU::INDX,6}},
-        {0x71, {"ADC",&Px6502CPU::ADC,&Px6502CPU::INDY,5}},
-        // Logical AND
-        {0x29, {"AND",&Px6502CPU::AND,&Px6502CPU::IMM,2}},
-        {0x25, {"AND",&Px6502CPU::AND,&Px6502CPU::ZP0,3}},
-        {0x35, {"AND",&Px6502CPU::AND,&Px6502CPU::ZPX,4}},
-        {0x2D, {"AND",&Px6502CPU::AND,&Px6502CPU::ABS,4}},
-        {0x3D, {"AND",&Px6502CPU::AND,&Px6502CPU::ABSX,4}},
-        {0x39, {"AND",&Px6502CPU::AND,&Px6502CPU::ABSY,4}},
-        {0x21, {"AND",&Px6502CPU::AND,&Px6502CPU::INDX,6}},
-        {0x31, {"AND",&Px6502CPU::AND,&Px6502CPU::INDY,5}},
-        // Arithmetic Shift Left
-        {0x0A, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ACC,2}},
-        {0x06, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ZP0,5}},
-        {0x16, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ZPX,6}},
-        {0x0E, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ABS,6}},
-        {0x1E, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ABSX,7}},
-        // Branch If Carry Clear
-        // TODO Cycle Count calculation
-        {0x90, {"BCC",&Px6502CPU::BCC,&Px6502CPU::REL,2}},
-        // Branch If Carry Set
-        // TODO Cycle Count calculation
-        {0xB0, {"BCS",&Px6502CPU::BCS,&Px6502CPU::REL,2}},
-        // Branch If Equal
-        // TODO Cycle Count calculation
-        {0xF0, {"BEQ",&Px6502CPU::BEQ,&Px6502CPU::REL,2}},
-        // BIT Test
-        {0x24, {"BIT",&Px6502CPU::BIT,&Px6502CPU::ZP0,3}},
-        {0x2C, {"BIT",&Px6502CPU::BIT,&Px6502CPU::ABS,4}},
-        // Branch If Minus
-        // TODO Cycle Count calculation
-        {0x30, {"BMI",&Px6502CPU::BMI,&Px6502CPU::REL,2}},
-        // Branch If Not Equal
-        // TODO Cycle Count calculation
-        {0xD0, {"BNE",&Px6502CPU::BNE,&Px6502CPU::REL,2}},
-        // Branch If Positive
-        // TODO Cycle Count calculation
-        {0x10, {"BPL",&Px6502CPU::BPL,&Px6502CPU::REL,2}},
-        // Break - Force Interrupt
-        {0x00, {"BRK",&Px6502CPU::BRK,&Px6502CPU::IMP,7}},
-        // Branch If Overflow Clear
-        // TODO Cycle Count calculation
-        {0x50, {"BVC",&Px6502CPU::BVC,&Px6502CPU::REL,2}},
-        // Branch If Overflow Set
-        // TODO Cycle Count calculation
-        {0x70, {"BVS",&Px6502CPU::BVS,&Px6502CPU::REL,2}},
-        // Clear Carry Flag
-        {0x18, {"CLC",&Px6502CPU::CLC,&Px6502CPU::IMP,2}},
-        // Clear Decimal Mode
-        {0xD8, {"CLD",&Px6502CPU::CLD,&Px6502CPU::IMP,2}},
-        // Clear Interrup Disable
-        {0x58, {"CLI",&Px6502CPU::CLI,&Px6502CPU::IMP,2}},
-        // Clear Overflow Flag
-        {0xB8, {"CLV",&Px6502CPU::CLV,&Px6502CPU::IMP,2}},
-        // Compare
-        {0xC9, {"CMP",&Px6502CPU::CMP,&Px6502CPU::IMM,2}},
-        {0xC5, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ZP0,3}},
-        {0xD5, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ZPX,4}},
-        {0xCD, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABS,4}},
-        {0xDD, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABSX,4}},
-        {0xD9, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABSY,4}},
-        {0xC1, {"CMP",&Px6502CPU::CMP,&Px6502CPU::INDX,6}},
-        {0xD1, {"CMP",&Px6502CPU::CMP,&Px6502CPU::INDY,5}},
-        // Compare X Register
-        {0xE0, {"CPX",&Px6502CPU::CPX,&Px6502CPU::IMM,2}},
-        {0xE4, {"CPX",&Px6502CPU::CPX,&Px6502CPU::ZP0,3}},
-        {0xEC, {"CPX",&Px6502CPU::CPX,&Px6502CPU::ABS,4}},
-        // Compare Y Register
-        {0xC0, {"CPY",&Px6502CPU::CPY,&Px6502CPU::IMM,2}},
-        {0xC4, {"CPY",&Px6502CPU::CPY,&Px6502CPU::ZP0,3}},
-        {0xCC, {"CPY",&Px6502CPU::CPY,&Px6502CPU::ABS,4}},
-        // Decrement Memory
-        {0xC6, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ZP0,5}},
-        {0xD6, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ZPX,6}},
-        {0xCE, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ABS,6}},
-        {0xDE, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ABSX,7}},
-        // Decrement X Register
-        {0xCA, {"DEX",&Px6502CPU::DEX,&Px6502CPU::IMP,2}},
-        // Decrement Y Register
-        {0x88, {"DEY",&Px6502CPU::DEY,&Px6502CPU::IMP,2}},
-        // Exclusive OR
-        {0x49, {"EOR",&Px6502CPU::EOR,&Px6502CPU::IMM,2}},
-        {0x45, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ZP0,3}},
-        {0x55, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ZPX,4}},
-        {0x4D, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABS,4}},
-        {0x5D, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABSX,4}},
-        {0x59, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABSY,4}},
-        {0x41, {"EOR",&Px6502CPU::EOR,&Px6502CPU::INDX,6}},
-        {0x51, {"EOR",&Px6502CPU::EOR,&Px6502CPU::INDY,5}},
-        // Increment Memory
-        {0xE6, {"INC",&Px6502CPU::INC,&Px6502CPU::ZP0,5}},
-        {0xF6, {"INC",&Px6502CPU::INC,&Px6502CPU::ZPX,6}},
-        {0xEE, {"INC",&Px6502CPU::INC,&Px6502CPU::ABS,6}},
-        {0xFE, {"INC",&Px6502CPU::INC,&Px6502CPU::ABSX,7}},
-        // Increment X Register
-        {0xE8, {"INX",&Px6502CPU::INX,&Px6502CPU::IMP,2}},
-        // Increment Y Register
-        {0xC8, {"INY",&Px6502CPU::INY,&Px6502CPU::IMP,2}},
-        // Jump
-        {0x4C, {"JMP",&Px6502CPU::JMP,&Px6502CPU::ABS,3}},
-        {0x6C, {"JMP",&Px6502CPU::JMP,&Px6502CPU::IND,5}},
-        // Jump Subroutine
-        {0x20, {"JSR",&Px6502CPU::JSR,&Px6502CPU::ABS,6}},
-        // Load Accumulator
-        {0xA9, {"LDA",&Px6502CPU::LDA,&Px6502CPU::IMM,2}},
-        {0xA5, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ZP0,3}},
-        {0xB5, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ZPX,4}},
-        {0xAD, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABS,4}},
-        {0xBD, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABSX,4}},
-        {0xB9, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABSY,4}},
-        {0xA1, {"LDA",&Px6502CPU::LDA,&Px6502CPU::INDX,6}},
-        {0xB1, {"LDA",&Px6502CPU::LDA,&Px6502CPU::INDY,5}},
-        // Load X Register
-        {0xA2, {"LDX",&Px6502CPU::LDX,&Px6502CPU::IMM,2}},
-        {0xA6, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ZP0,3}},
-        {0xB6, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ZPY,4}},
-        {0xAE, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ABS,4}},
-        {0xBE, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ABSY,4}},
-        // Load Y Register
-        {0xA2, {"LDY",&Px6502CPU::LDY,&Px6502CPU::IMM,2}},
-        {0xA6, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ZP0,3}},
-        {0xB6, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ZPX,4}},
-        {0xAE, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ABS,4}},
-        {0xBE, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ABSX,4}},
-        // Logical Shift Right
-        {0x4A, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ACC,2}},
-        {0x46, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ZP0,5}},
-        {0x56, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ZPX,6}},
-        {0x4E, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ABS,6}},
-        {0x5E, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ABSX,7}},
-        // No Operation
-        {0xEA, {"NOP",&Px6502CPU::NOP,&Px6502CPU::IMP,2}},
-        // Logical Inclusive OR
-        {0x09, {"ORA",&Px6502CPU::ORA,&Px6502CPU::IMM,2}},
-        {0x05, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ZP0,3}},
-        {0x15, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ZPX,4}},
-        {0x0D, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABS,4}},
-        {0x1D, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABSX,4}},
-        {0x19, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABSY,4}},
-        {0x01, {"ORA",&Px6502CPU::ORA,&Px6502CPU::INDX,6}},
-        {0x11, {"ORA",&Px6502CPU::ORA,&Px6502CPU::INDY,5}},
-        // Push Accumulator
-        {0x48, {"PHA",&Px6502CPU::PHA,&Px6502CPU::IMP,3}},
-        // Push Processor Status
-        {0x08, {"PHP",&Px6502CPU::PHP,&Px6502CPU::IMP,3}},
-        // Pull Accumulator
-        {0x68, {"PLA",&Px6502CPU::PLA,&Px6502CPU::IMP,4}},
-        // Pull Processor Status
-        {0x28, {"PLP",&Px6502CPU::PLP,&Px6502CPU::IMP,4}},
-        // Rotate Left
-        {0x2A, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ACC,2}},
-        {0x26, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ZP0,5}},
-        {0x36, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ZPX,6}},
-        {0x2E, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ABS,6}},
-        {0x3E, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ABSX,7}},
-        // Rotate Right
-        {0x6A, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ACC,2}},
-        {0x66, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ZP0,5}},
-        {0x76, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ZPX,6}},
-        {0x6E, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ABS,6}},
-        {0x7E, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ABSX,7}},
-        // Return from Interrupt
-        {0x40, {"RTI",&Px6502CPU::RTI,&Px6502CPU::IMP,6}},
-        // Return from Subroutine
-        {0x60, {"RTS",&Px6502CPU::RTS,&Px6502CPU::IMP,6}},
-        // Substract with Carry
-        {0xE9, {"SBC",&Px6502CPU::SBC,&Px6502CPU::IMM,2}},
-        {0xE5, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ZP0,3}},
-        {0xF5, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ZPX,4}},
-        {0xED, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABS,4}},
-        {0xFD, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABSX,4}},
-        {0xF9, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABSY,4}},
-        {0xE1, {"SBC",&Px6502CPU::SBC,&Px6502CPU::INDX,6}},
-        {0xF1, {"SBC",&Px6502CPU::SBC,&Px6502CPU::INDY,5}},
-        // Set Carry Flag
-        {0x38, {"SEC",&Px6502CPU::SEC,&Px6502CPU::IMP,2}},
-        // Set Decimal Flag
-        {0xF8, {"SED",&Px6502CPU::SED,&Px6502CPU::IMP,2}},
-        // Set Interrupt Disable
-        {0x78, {"SEI",&Px6502CPU::SEI,&Px6502CPU::IMP,2}},
-        // Store Accumulator
-        {0x85, {"STA",&Px6502CPU::STA,&Px6502CPU::ZP0,3}},
-        {0x95, {"STA",&Px6502CPU::STA,&Px6502CPU::ZPX,4}},
-        {0x8D, {"STA",&Px6502CPU::STA,&Px6502CPU::ABS,4}},
-        {0x9D, {"STA",&Px6502CPU::STA,&Px6502CPU::ABSX,5}},
-        {0x99, {"STA",&Px6502CPU::STA,&Px6502CPU::ABSY,5}},
-        {0x81, {"STA",&Px6502CPU::STA,&Px6502CPU::INDX,6}},
-        {0x91, {"STA",&Px6502CPU::STA,&Px6502CPU::INDY,6}},
-        // Store X Register
-        {0x89, {"STX",&Px6502CPU::STX,&Px6502CPU::ZP0,3}},
-        {0x96, {"STX",&Px6502CPU::STX,&Px6502CPU::ZPY,4}},
-        {0x8E, {"STX",&Px6502CPU::STX,&Px6502CPU::ABS,4}},
-        // Store Y Register
-        {0x84, {"STY",&Px6502CPU::STY,&Px6502CPU::ZP0,3}},
-        {0x94, {"STY",&Px6502CPU::STY,&Px6502CPU::ZPX,4}},
-        {0x8C, {"STY",&Px6502CPU::STY,&Px6502CPU::ABS,4}},
-        // Transfer Accumulator to Register X
-        {0xAA, {"TAX",&Px6502CPU::TAX,&Px6502CPU::IMP,2}},
-        // Transfer Accumulator to Register Y
-        {0xA8, {"TAY",&Px6502CPU::TAY,&Px6502CPU::IMP,2}},
-        // Transfer Stack Pointer to Register X
-        {0xBA, {"TSX",&Px6502CPU::TSX,&Px6502CPU::IMP,2}},
-        // Transfer X Register to Accumulator
-        {0x8A, {"TXA",&Px6502CPU::TXA,&Px6502CPU::IMP,2}},
-        // Transfer X Register to Stack Pointer
-        {0x9A, {"TXS",&Px6502CPU::TXS,&Px6502CPU::IMP,2}},
-        // Transfer Y Register to Accumulator
-        {0x98, {"TYA",&Px6502CPU::TYA,&Px6502CPU::IMP,2}},
-    };
+            // ADD with Carry
+            {0x69, {"ADC",&Px6502CPU::ADC,&Px6502CPU::IMM,2,false}},
+            {0x65, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ZP0,3,false}},
+            {0x75, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ZPX,4,false}},
+            {0x6D, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABS,4,false}},
+            {0x7D, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABSX,4,true}},
+            {0x79, {"ADC",&Px6502CPU::ADC,&Px6502CPU::ABSY,4,true}},
+            {0x61, {"ADC",&Px6502CPU::ADC,&Px6502CPU::INDX,6,false}},
+            {0x71, {"ADC",&Px6502CPU::ADC,&Px6502CPU::INDY,5,true}},
+            // Logical AND
+            {0x29, {"AND",&Px6502CPU::AND,&Px6502CPU::IMM,2,false}},
+            {0x25, {"AND",&Px6502CPU::AND,&Px6502CPU::ZP0,3,false}},
+            {0x35, {"AND",&Px6502CPU::AND,&Px6502CPU::ZPX,4,false}},
+            {0x2D, {"AND",&Px6502CPU::AND,&Px6502CPU::ABS,4,false}},
+            {0x3D, {"AND",&Px6502CPU::AND,&Px6502CPU::ABSX,4,true}},
+            {0x39, {"AND",&Px6502CPU::AND,&Px6502CPU::ABSY,4,true}},
+            {0x21, {"AND",&Px6502CPU::AND,&Px6502CPU::INDX,6,false}},
+            {0x31, {"AND",&Px6502CPU::AND,&Px6502CPU::INDY,5,true}},
+            // Arithmetic Shift Left
+            {0x0A, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ACC,2,false}},
+            {0x06, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ZP0,5,false}},
+            {0x16, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ZPX,6,false}},
+            {0x0E, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ABS,6,false}},
+            {0x1E, {"ASL",&Px6502CPU::ASL,&Px6502CPU::ABSX,7,false}},
+            // Branch If Carry Clear
+            {0x90, {"BCC",&Px6502CPU::BCC,&Px6502CPU::REL,2,true}},
+            // Branch If Carry Set
+            {0xB0, {"BCS",&Px6502CPU::BCS,&Px6502CPU::REL,2,true}},
+            // Branch If Equal
+            {0xF0, {"BEQ",&Px6502CPU::BEQ,&Px6502CPU::REL,2,true}},
+            // BIT Test
+            {0x24, {"BIT",&Px6502CPU::BIT,&Px6502CPU::ZP0,3,false}},
+            {0x2C, {"BIT",&Px6502CPU::BIT,&Px6502CPU::ABS,4,false}},
+            // Branch If Minus
+            {0x30, {"BMI",&Px6502CPU::BMI,&Px6502CPU::REL,2,true}},
+            // Branch If Not Equal
+            {0xD0, {"BNE",&Px6502CPU::BNE,&Px6502CPU::REL,2,true}},
+            // Branch If Positive
+            {0x10, {"BPL",&Px6502CPU::BPL,&Px6502CPU::REL,2,true}},
+            // Break - Force Interrupt
+            {0x00, {"BRK",&Px6502CPU::BRK,&Px6502CPU::IMP,7,false}},
+            // Branch If Overflow Clear
+            {0x50, {"BVC",&Px6502CPU::BVC,&Px6502CPU::REL,2,true}},
+            // Branch If Overflow Set
+            {0x70, {"BVS",&Px6502CPU::BVS,&Px6502CPU::REL,2,true}},
+            // Clear Carry Flag
+            {0x18, {"CLC",&Px6502CPU::CLC,&Px6502CPU::IMP,2,false}},
+            // Clear Decimal Mode
+            {0xD8, {"CLD",&Px6502CPU::CLD,&Px6502CPU::IMP,2,false}},
+            // Clear Interrup Disable
+            {0x58, {"CLI",&Px6502CPU::CLI,&Px6502CPU::IMP,2,false}},
+            // Clear Overflow Flag
+            {0xB8, {"CLV",&Px6502CPU::CLV,&Px6502CPU::IMP,2,false}},
+            // Compare
+            {0xC9, {"CMP",&Px6502CPU::CMP,&Px6502CPU::IMM,2,false}},
+            {0xC5, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ZP0,3,false}},
+            {0xD5, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ZPX,4,false}},
+            {0xCD, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABS,4,false}},
+            {0xDD, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABSX,4,true}},
+            {0xD9, {"CMP",&Px6502CPU::CMP,&Px6502CPU::ABSY,4,true}},
+            {0xC1, {"CMP",&Px6502CPU::CMP,&Px6502CPU::INDX,6,false}},
+            {0xD1, {"CMP",&Px6502CPU::CMP,&Px6502CPU::INDY,5,true}},
+            // Compare X Register
+            {0xE0, {"CPX",&Px6502CPU::CPX,&Px6502CPU::IMM,2,false}},
+            {0xE4, {"CPX",&Px6502CPU::CPX,&Px6502CPU::ZP0,3,false}},
+            {0xEC, {"CPX",&Px6502CPU::CPX,&Px6502CPU::ABS,4,false}},
+            // Compare Y Register
+            {0xC0, {"CPY",&Px6502CPU::CPY,&Px6502CPU::IMM,2,false}},
+            {0xC4, {"CPY",&Px6502CPU::CPY,&Px6502CPU::ZP0,3,false}},
+            {0xCC, {"CPY",&Px6502CPU::CPY,&Px6502CPU::ABS,4,false}},
+            // Decrement Memory
+            {0xC6, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ZP0,5,false}},
+            {0xD6, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ZPX,6,false}},
+            {0xCE, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ABS,6,false}},
+            {0xDE, {"DEC",&Px6502CPU::DEC,&Px6502CPU::ABSX,7,false}},
+            // Decrement X Register
+            {0xCA, {"DEX",&Px6502CPU::DEX,&Px6502CPU::IMP,2,false}},
+            // Decrement Y Register
+            {0x88, {"DEY",&Px6502CPU::DEY,&Px6502CPU::IMP,2,false}},
+            // Exclusive OR
+            {0x49, {"EOR",&Px6502CPU::EOR,&Px6502CPU::IMM,2,false}},
+            {0x45, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ZP0,3,false}},
+            {0x55, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ZPX,4,false}},
+            {0x4D, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABS,4,false}},
+            {0x5D, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABSX,4,true}},
+            {0x59, {"EOR",&Px6502CPU::EOR,&Px6502CPU::ABSY,4,true}},
+            {0x41, {"EOR",&Px6502CPU::EOR,&Px6502CPU::INDX,6,false}},
+            {0x51, {"EOR",&Px6502CPU::EOR,&Px6502CPU::INDY,5,true}},
+            // Increment Memory
+            {0xE6, {"INC",&Px6502CPU::INC,&Px6502CPU::ZP0,5,false}},
+            {0xF6, {"INC",&Px6502CPU::INC,&Px6502CPU::ZPX,6,false}},
+            {0xEE, {"INC",&Px6502CPU::INC,&Px6502CPU::ABS,6,false}},
+            {0xFE, {"INC",&Px6502CPU::INC,&Px6502CPU::ABSX,7,false}},
+            // Increment X Register
+            {0xE8, {"INX",&Px6502CPU::INX,&Px6502CPU::IMP,2,false}},
+            // Increment Y Register
+            {0xC8, {"INY",&Px6502CPU::INY,&Px6502CPU::IMP,2,false}},
+            // Jump
+            {0x4C, {"JMP",&Px6502CPU::JMP,&Px6502CPU::ABS,3,false}},
+            {0x6C, {"JMP",&Px6502CPU::JMP,&Px6502CPU::IND,5,false}},
+            // Jump Subroutine
+            {0x20, {"JSR",&Px6502CPU::JSR,&Px6502CPU::ABS,6,false}},
+            // Load Accumulator
+            {0xA9, {"LDA",&Px6502CPU::LDA,&Px6502CPU::IMM,2,false}},
+            {0xA5, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ZP0,3,false}},
+            {0xB5, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ZPX,4,false}},
+            {0xAD, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABS,4,false}},
+            {0xBD, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABSX,4,true}},
+            {0xB9, {"LDA",&Px6502CPU::LDA,&Px6502CPU::ABSY,4,true}},
+            {0xA1, {"LDA",&Px6502CPU::LDA,&Px6502CPU::INDX,6,false}},
+            {0xB1, {"LDA",&Px6502CPU::LDA,&Px6502CPU::INDY,5,true}},
+            // Load X Register
+            {0xA2, {"LDX",&Px6502CPU::LDX,&Px6502CPU::IMM,2,false}},
+            {0xA6, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ZP0,3,false}},
+            {0xB6, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ZPY,4,false}},
+            {0xAE, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ABS,4,false}},
+            {0xBE, {"LDX",&Px6502CPU::LDX,&Px6502CPU::ABSY,4,true}},
+            // Load Y Register
+            {0xA0, {"LDY",&Px6502CPU::LDY,&Px6502CPU::IMM,2,false}},
+            {0xA4, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ZP0,3,false}},
+            {0xB4, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ZPX,4,false}},
+            {0xAC, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ABS,4,false}},
+            {0xBC, {"LDY",&Px6502CPU::LDY,&Px6502CPU::ABSX,4,true}},
+            // Logical Shift Right
+            {0x4A, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ACC,2,false}},
+            {0x46, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ZP0,5,false}},
+            {0x56, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ZPX,6,false}},
+            {0x4E, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ABS,6,false}},
+            {0x5E, {"LSR",&Px6502CPU::LSR,&Px6502CPU::ABSX,7,false}},
+            // No Operation
+            {0xEA, {"NOP",&Px6502CPU::NOP,&Px6502CPU::IMP,2,false}},
+            // Logical Inclusive OR
+            {0x09, {"ORA",&Px6502CPU::ORA,&Px6502CPU::IMM,2,false}},
+            {0x05, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ZP0,3,false}},
+            {0x15, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ZPX,4,false}},
+            {0x0D, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABS,4,false}},
+            {0x1D, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABSX,4,true}},
+            {0x19, {"ORA",&Px6502CPU::ORA,&Px6502CPU::ABSY,4,true}},
+            {0x01, {"ORA",&Px6502CPU::ORA,&Px6502CPU::INDX,6,false}},
+            {0x11, {"ORA",&Px6502CPU::ORA,&Px6502CPU::INDY,5,true}},
+            // Push Accumulator
+            {0x48, {"PHA",&Px6502CPU::PHA,&Px6502CPU::IMP,3,false}},
+            // Push Processor Status
+            {0x08, {"PHP",&Px6502CPU::PHP,&Px6502CPU::IMP,3,false}},
+            // Pull Accumulator
+            {0x68, {"PLA",&Px6502CPU::PLA,&Px6502CPU::IMP,4,false}},
+            // Pull Processor Status
+            {0x28, {"PLP",&Px6502CPU::PLP,&Px6502CPU::IMP,4,false}},
+            // Rotate Left
+            {0x2A, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ACC,2,false}},
+            {0x26, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ZP0,5,false}},
+            {0x36, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ZPX,6,false}},
+            {0x2E, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ABS,6,false}},
+            {0x3E, {"ROL",&Px6502CPU::ROL,&Px6502CPU::ABSX,7,false}},
+            // Rotate Right
+            {0x6A, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ACC,2,false}},
+            {0x66, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ZP0,5,false}},
+            {0x76, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ZPX,6,false}},
+            {0x6E, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ABS,6,false}},
+            {0x7E, {"ROR",&Px6502CPU::ROR,&Px6502CPU::ABSX,7,false}},
+            // Return from Interrupt
+            {0x40, {"RTI",&Px6502CPU::RTI,&Px6502CPU::IMP,6,false}},
+            // Return from Subroutine
+            {0x60, {"RTS",&Px6502CPU::RTS,&Px6502CPU::IMP,6,false}},
+            // Substract with Carry
+            {0xE9, {"SBC",&Px6502CPU::SBC,&Px6502CPU::IMM,2,false}},
+            {0xE5, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ZP0,3,false}},
+            {0xF5, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ZPX,4,false}},
+            {0xED, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABS,4,false}},
+            {0xFD, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABSX,4,true}},
+            {0xF9, {"SBC",&Px6502CPU::SBC,&Px6502CPU::ABSY,4,true}},
+            {0xE1, {"SBC",&Px6502CPU::SBC,&Px6502CPU::INDX,6,false}},
+            {0xF1, {"SBC",&Px6502CPU::SBC,&Px6502CPU::INDY,5,true}},
+            // Set Carry Flag
+            {0x38, {"SEC",&Px6502CPU::SEC,&Px6502CPU::IMP,2,false}},
+            // Set Decimal Flag
+            {0xF8, {"SED",&Px6502CPU::SED,&Px6502CPU::IMP,2,false}},
+            // Set Interrupt Disable
+            {0x78, {"SEI",&Px6502CPU::SEI,&Px6502CPU::IMP,2,false}},
+            // Store Accumulator
+            {0x85, {"STA",&Px6502CPU::STA,&Px6502CPU::ZP0,3,false}},
+            {0x95, {"STA",&Px6502CPU::STA,&Px6502CPU::ZPX,4,false}},
+            {0x8D, {"STA",&Px6502CPU::STA,&Px6502CPU::ABS,4,false}},
+            {0x9D, {"STA",&Px6502CPU::STA,&Px6502CPU::ABSX,5,false}},
+            {0x99, {"STA",&Px6502CPU::STA,&Px6502CPU::ABSY,5,false}},
+            {0x81, {"STA",&Px6502CPU::STA,&Px6502CPU::INDX,6,false}},
+            {0x91, {"STA",&Px6502CPU::STA,&Px6502CPU::INDY,6,false}},
+            // Store X Register
+            {0x86, {"STX",&Px6502CPU::STX,&Px6502CPU::ZP0,3,false}},
+            {0x96, {"STX",&Px6502CPU::STX,&Px6502CPU::ZPY,4,false}},
+            {0x8E, {"STX",&Px6502CPU::STX,&Px6502CPU::ABS,4,false}},
+            // Store Y Register
+            {0x84, {"STY",&Px6502CPU::STY,&Px6502CPU::ZP0,3,false}},
+            {0x94, {"STY",&Px6502CPU::STY,&Px6502CPU::ZPX,4,false}},
+            {0x8C, {"STY",&Px6502CPU::STY,&Px6502CPU::ABS,4,false}},
+            // Transfer Accumulator to Register X
+            {0xAA, {"TAX",&Px6502CPU::TAX,&Px6502CPU::IMP,2,false}},
+            // Transfer Accumulator to Register Y
+            {0xA8, {"TAY",&Px6502CPU::TAY,&Px6502CPU::IMP,2,false}},
+            // Transfer Stack Pointer to Register X
+            {0xBA, {"TSX",&Px6502CPU::TSX,&Px6502CPU::IMP,2,false}},
+            // Transfer X Register to Accumulator
+            {0x8A, {"TXA",&Px6502CPU::TXA,&Px6502CPU::IMP,2,false}},
+            // Transfer X Register to Stack Pointer
+            {0x9A, {"TXS",&Px6502CPU::TXS,&Px6502CPU::IMP,2,false}},
+            // Transfer Y Register to Accumulator
+            {0x98, {"TYA",&Px6502CPU::TYA,&Px6502CPU::IMP,2,false}},
+        };
+
+    // CPU POWER UP STATE
+    setFlag(B,true);
+    setFlag(U,true);
+    a = 0x00;
+    x = 0x00;
+    y = 0x00;
+    // write(0x4017,0x00);
+    // write(0x4015,0x00);
+
 }
 
 Px6502CPU::~Px6502CPU()
@@ -245,13 +247,23 @@ void Px6502CPU::clock(){
     if(cycles == 0){
         opcode = read(pc);
         pc++;
-        cycles = operationLookup[opcode].cycles;
+        if(operationLookup.count(opcode)){
+            cycles = operationLookup[opcode].cycles;
 
-        cycles += (this->*operationLookup[opcode].pAddressingFunction)();
-        cycles += (this->*operationLookup[opcode].pOperationFunction)();
+            uint8_t additional_cycle_addressing = (this->*operationLookup[opcode].pAddressingFunction)();
+            uint8_t additional_cycle_operation = (this->*operationLookup[opcode].pOperationFunction)();
+            
+            if(operationLookup[opcode].canHaveAdditionalCycles){
+                cycles += additional_cycle_addressing + additional_cycle_operation;
+            }
+        } else {
+            std::cout << "Problem occured, OPCODE: " << (int)opcode;
+            return;
+        }
     }
-
+    total_cycle_count++;
     cycles--;
+    setFlag(U,true);
 
 }
 
@@ -260,6 +272,11 @@ void Px6502CPU::clockByInstruction(){
         clock();
     }
     while(cycles > 0);
+}
+
+void Px6502CPU::reset(){
+    sp -= 3;
+    setFlag(I,true);
 }
 
 void Px6502CPU::setFlag(FLAGS flag, bool s){
@@ -416,7 +433,9 @@ uint8_t Px6502CPU::IND(){
     uint8_t operand_MSB = read(pc);
     pc++;
 
-    effective_address = ( (operand_MSB << 8) + operand_LSB );
+    uint16_t operand =  (operand_MSB << 8) + operand_LSB;
+
+    effective_address = ( (read(operand+1) << 8) + read(operand) );
     return 0;
 }
 
@@ -469,44 +488,41 @@ uint8_t Px6502CPU::fetch(){
 // More details can be found here: https://www.nesdev.org/obelisk-6502-guide/reference.html
 
 // Adding with carry
-// More Details: https://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
 uint8_t Px6502CPU::ADC(){
     fethced_data = read(effective_address);
 
-    uint8_t temp = a + fethced_data + getFlag(C);
+        uint8_t temp = a + fethced_data + getFlag(C);
 
-    bool accumulatorSignBit = a & (0b10000000);                 // Get Bit 7 of the Accumulator
-    bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
+        bool accumulatorSignBit = a & (0b10000000);                 // Get Bit 7 of the Accumulator
+        bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
+        bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
 
-    bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
+        // Set Overflow Truth Table
+        // fethedDataSignBit | accumulatorSignBit | tempDataSignBit |  Overflow Status
+        //        0          |          0         |         0       |         0         Positive + Positive = Positive
+        //        0          |          0         |         1       |         1         Positive + Positive = Negative !!!! OVERFLOW
+        //        0          |          1         |         0       |         0         Positive + Negative = Positive 
+        //        0          |          1         |         1       |         0         Positive + Negative = Negative
+        //        1          |          0         |         0       |         0         Negative + Positive = Positive
+        //        1          |          0         |         1       |         0         Negative + Positive = Negative
+        //        1          |          1         |         0       |         1         Negative + Negative = Positive !!!! OVERFLOW
+        //        1          |          1         |         1       |         0         Negative + Negative = Negative
+        setFlag(V, (fethedDataSignBit == accumulatorSignBit) and (tempDataSignBit != accumulatorSignBit) );
+        setFlag(C, temp < (a + fethced_data));                      // Set the Carry Flag if result is smaller than addition
+        setFlag(N, (temp & 0b10000000) > 0);                        // Set Negative Flag if Sign Bit is set
+        setFlag(Z, temp == 0x00);                                   // Set Zero Flag if result is 0
+        
+        // Set result to Accumulator
+        a = temp;
 
-    // Set Overflow Truth Table
+        return 0;
 
-    // fethedDataSignBit | accumulatorSignBit | tempDataSignBit |  Overflow Status
-    //        0          |          0         |         0       |         0
-    //        0          |          0         |         1       |         1
-    //        0          |          1         |         0       |         0
-    //        0          |          1         |         1       |         0
-    //        1          |          0         |         0       |         0
-    //        1          |          0         |         1       |         0
-    //        1          |          1         |         0       |         1
-    //        1          |          1         |         1       |         0
-    setFlag(V, (fethedDataSignBit == accumulatorSignBit) and (tempDataSignBit != accumulatorSignBit) );
-
-    setFlag(C, temp < (a + fethced_data));
-
-    a = temp;
-    
-    setFlag(N, (a & 0b10000000) > 0);
-    setFlag(Z, a == 0x00);
-
-    return 0;
 }
 
 uint8_t Px6502CPU::AND(){
     a = a & read(effective_address);
-    setFlag(Z, a == 0x00);
-    setFlag(N,(a & 0b10000000) > 0);
+    setFlag(Z, a == 0x00);                                          // Set Zero Flag if result is 0       
+    setFlag(N,(a & 0b10000000) > 0);                                // Set Negative Flag if Sign Bit is set
     return 0;
 }
 
@@ -521,8 +537,8 @@ uint8_t Px6502CPU::ASL(){
     setFlag(C,fethced_data & 0b10000000);             // Set Carry Flag to the Bit 7 of the Data
     
     uint8_t temp = fethced_data << 1;
-    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if loaded data after operation is 0
-    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if bit 7 is set
+    setFlag(Z, temp == 0x00);                                  // Set Zero Flag if result is 0
+    setFlag(N, (temp & 0b10000000) > 0);                       // Set Negative Flag if Sign Bit is set
 
     if(operationLookup[opcode].pAddressingFunction == &Px6502CPU::ACC)
         a = temp;
@@ -531,6 +547,11 @@ uint8_t Px6502CPU::ASL(){
 
     return 0;
 }
+// BRANCHING INSTRUCTIONS:
+// Relative address is 8 bit signed integer.
+// Set the new program counter to relative address.
+// Return additional clock cycles:
+//       1 more if successful 2 more if successful and page changed
 
 uint8_t Px6502CPU::BCC(){
     if(getFlag(C) == 0x00){
@@ -571,14 +592,6 @@ uint8_t Px6502CPU::BEQ(){
     return 0;
 }
 
-uint8_t Px6502CPU::BIT(){
-    fethced_data = read(effective_address);
-    uint8_t temp = a & fethced_data;
-    setFlag(Z, temp == 0x00);
-    setFlag(N,(fethced_data & 0b10000000) > 0);
-    setFlag(V,(fethced_data & 0b01000000) > 0);
-    return 0;
-}
 
 uint8_t Px6502CPU::BMI(){
     if(getFlag(N) > 0){
@@ -619,28 +632,6 @@ uint8_t Px6502CPU::BPL(){
     return 0;
 }
 
-uint8_t Px6502CPU::BRK(){
-    uint8_t MSB = pc >> 8;
-    uint8_t LSB = pc & 0x00FF;
-
-    setFlag(B,true);
-
-    write(0x0100 + sp, MSB);
-    sp--;
-    write(0x0100 + sp, LSB);
-    sp--;
-
-    write(0x0100 + sp, status);
-    sp--;
-
-    LSB = read(0xFFFE);
-    MSB = read(0xFFFF);
-
-    pc = (MSB << 8) + LSB; 
-
-    return 0;
-}
-
 uint8_t Px6502CPU::BVC(){
     if(getFlag(V) == 0){
         uint16_t newProgramCounter = pc + relative_address;
@@ -667,6 +658,41 @@ uint8_t Px6502CPU::BVS(){
     return 0;
 }
 
+uint8_t Px6502CPU::BIT(){
+    fethced_data = read(effective_address);
+    uint8_t temp = a & fethced_data;
+    setFlag(Z, temp == 0x00);
+    setFlag(N,(fethced_data & 0b10000000) > 0);
+    setFlag(V,(fethced_data & 0b01000000) > 0);
+    return 0;
+}
+
+uint8_t Px6502CPU::BRK(){
+    uint8_t MSB = pc >> 8;
+    uint8_t LSB = pc & 0x00FF;
+
+    setFlag(B,true);
+
+    write(0x0100 + sp, MSB);
+    sp--;
+    write(0x0100 + sp, LSB);
+    sp--;
+
+    write(0x0100 + sp, status);
+    sp--;
+
+    LSB = read(0xFFFE);
+    MSB = read(0xFFFF);
+
+    pc = (MSB << 8) + LSB; 
+
+    return 0;
+}
+
+
+// FLAG INSTRUCTIONS
+// Set or Clear Flag
+
 uint8_t Px6502CPU::CLC(){
     setFlag(C,false);
     return 0;
@@ -684,6 +710,21 @@ uint8_t Px6502CPU::CLI(){
 
 uint8_t Px6502CPU::CLV(){
     setFlag(V,false);
+    return 0;
+}
+
+uint8_t Px6502CPU::SEC(){
+    setFlag(C,true);
+    return 0;
+}
+
+uint8_t Px6502CPU::SED(){
+    setFlag(D,true);
+    return 0;
+}
+
+uint8_t Px6502CPU::SEI(){
+    setFlag(I,true);
     return 0;
 }
 
@@ -770,7 +811,7 @@ uint8_t Px6502CPU::JMP(){
 }
 
 uint8_t Px6502CPU::JSR(){
-    pc--;
+    pc++;
     // Everyting in page 1 is considered stack in 6502.
     // Store Program Counter to Stack. MSB first
     uint8_t MSB = pc >> 8;
@@ -948,50 +989,45 @@ uint8_t Px6502CPU::RTS(){
 
 uint8_t Px6502CPU::SBC(){
     fethced_data = read(effective_address);
-    uint8_t temp = a - fethced_data - (1 - getFlag(C));
+    // Get Twos complement on fetched data.
+    // Formulae for the Subtraction is -> A = A-M-(1-C) -> A = A - M -1 + C
+    // We can change M to its negative with twos complement. -M = + (M^0xFF +1) -> We Use 0xFF bc MOS 6502 is a 8-bit CPU.
+    // A -M -1 +C = A + (M^0xFF) + C
+    // Formulae turned to addition with flipping the bits in M.
+    fethced_data ^= 0xFF;
+    // fethced_data += 1;
+    uint8_t temp = a + fethced_data + getFlag(C);
+
+    
 
     bool accumulatorSignBit = a & (0b10000000);                 // Get Bit 7 of the Accumulator
     bool fethedDataSignBit = fethced_data & (0b10000000);       // Get Bit 7 of the Fetched Memory Data
+    bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition.
 
-    bool tempDataSignBit = temp & (0b10000000);                 // Get Bit 7 of the Addition
-
-    // Set Overflow Truth Table for Substract
+    // Set Overflow Truth Table
 
     // fethedDataSignBit | accumulatorSignBit | tempDataSignBit |  Overflow Status
     //        0          |          0         |         0       |         0
-    //        0          |          0         |         1       |         0
+    //        0          |          0         |         1       |         1
     //        0          |          1         |         0       |         0
-    //        0          |          1         |         1       |         1
-    //        1          |          0         |         0       |         1
+    //        0          |          1         |         1       |         0
+    //        1          |          0         |         0       |         0
     //        1          |          0         |         1       |         0
-    //        1          |          1         |         0       |         0
+    //        1          |          1         |         0       |         1
     //        1          |          1         |         1       |         0
-    setFlag(V, (fethedDataSignBit != accumulatorSignBit) and (tempDataSignBit == accumulatorSignBit) );
+    setFlag(V, (fethedDataSignBit == accumulatorSignBit) and (tempDataSignBit != accumulatorSignBit));
 
-    setFlag(C, temp > (a + fethced_data));
-
+    setFlag(C, temp < (a + fethced_data));
+    std::cout << (int)(a) << " + " << (int) fethced_data << " = " << (int) ((int8_t)temp) << std::endl;
     a = temp;
-    
+
     setFlag(N, (a & 0b10000000) > 0);
     setFlag(Z, a == 0x00);
 
     return 0;
 }
 
-uint8_t Px6502CPU::SEC(){
-    setFlag(C,true);
-    return 0;
-}
 
-uint8_t Px6502CPU::SED(){
-    setFlag(D,true);
-    return 0;
-}
-
-uint8_t Px6502CPU::SEI(){
-    setFlag(I,true);
-    return 0;
-}
 
 uint8_t Px6502CPU::STA(){
     write(effective_address,a);
