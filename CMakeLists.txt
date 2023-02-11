@@ -13,11 +13,30 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 
 set(PROJECT_SOURCES
-        main.cpp
+        src/main.cpp
         qml.qrc
-        testclass.cpp
-        Bus.cpp
-        Px6502CPU.cpp
+        src/testclass.cpp
+        inc/testclass.h
+        src/Bus.cpp
+        inc/Bus.h
+        src/Px6502CPU.cpp
+        inc/Px6502CPU.h
+        src/PxCartridge.cpp
+        inc/PxCartridge.h
+        src/Px2C02PPU.cpp
+        inc/Px2C02PPU.h
+        src/registers/Register.cpp
+        inc/registers/Register.h
+        src/registers/PpuAddressRegister.cpp
+        inc/registers/PpuAddressRegister.h
+        src/registers/PpuControlRegister.cpp
+        inc/registers/PpuControlRegister.h
+        src/registers/PpuMaskRegister.cpp
+        inc/registers/PpuMaskRegister.h
+        src/mappers/PxMapper.cpp
+        inc/mappers/PxMapper.h
+        src/mappers/Mapper000.cpp
+        inc/mappers/Mapper000.h
 )
 
 
@@ -46,6 +65,9 @@ endif()
 
 target_link_libraries(deneme
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+
+target_include_directories(deneme PRIVATE ${PROJECT_SOURCE_DIR}/mappers)
+target_include_directories(deneme PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 
 set_target_properties(deneme PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

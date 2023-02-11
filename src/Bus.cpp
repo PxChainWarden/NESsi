@@ -1,8 +1,5 @@
 #include "Bus.h"
 
-#pragma once
-#include <iostream>
-
 Bus::Bus(/* args */)
 {
     this->cpu.connectBus(this);
@@ -52,4 +49,5 @@ void Bus::write(uint16_t address, uint8_t data){
 
 void Bus::attachCartridge(std::shared_ptr<PxCartridge>& cartridge){
     this->cartridge = cartridge;
+    this->ppu.connectCartridge(cartridge);
 }

@@ -11,5 +11,5 @@ public:
     ~Mapper000();
 
     uint32_t cpuGetMappedAddress(uint16_t address) override;
-    uint8_t ppuReadFromCartridge(uint16_t address) override;
+    uint32_t ppuReadFromCartridge(uint16_t address) override;
 };

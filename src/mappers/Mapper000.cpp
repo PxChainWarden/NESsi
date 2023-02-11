@@ -30,6 +30,9 @@ uint32_t Mapper000::cpuGetMappedAddress(uint16_t address){
     return 0x00;
 }
 
-uint8_t Mapper000::ppuReadFromCartridge(uint16_t address){
-    return 0x00;
+// In this type of ROM, there is only 1 bank for chr_data
+// chr_data banks are 8KB of memory.
+uint32_t Mapper000::ppuReadFromCartridge(uint16_t address){
+    // Mod by 8K to get actual vector index
+    return address % 0x2000;
 }

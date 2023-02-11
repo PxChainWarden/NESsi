@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     // TestClass t;
 
     qmlRegisterType<TestClass>("testPackage", 1, 0, "TestClass");
+    qmlRegisterType<pixelData>("testPackage", 1, 0, "pixelData");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

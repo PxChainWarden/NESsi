@@ -72,5 +72,5 @@ uint8_t PxCartridge::cpuReadFromCartridge(uint16_t address){
 
 // Read Cartridge data from PPU
 uint8_t PxCartridge::ppuReadFromCartridge(uint16_t address){
-    return 0x00;
+    return this->chr_rom[mapper_pointer->ppuReadFromCartridge(address)];
 }

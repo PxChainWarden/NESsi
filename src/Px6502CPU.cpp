@@ -1,5 +1,5 @@
 #include "Bus.h"
-#include <iostream>
+#include <QDebug>
 
 Px6502CPU::Px6502CPU(/* args */)
 {
@@ -257,7 +257,7 @@ void Px6502CPU::clock(){
                 cycles += additional_cycle_addressing + additional_cycle_operation;
             }
         } else {
-            std::cout << "Problem occured, OPCODE: " << (int)opcode;
+            qDebug() << "Problem occured, OPCODE: " << (int)opcode;
             return;
         }
     }
@@ -360,7 +360,6 @@ void Px6502CPU::nmi(){
 
 void Px6502CPU::setFlag(FLAGS flag, bool s){
     if(s){
-        // std::cout << s << std::endl << flag << std::endl;
         status |= flag;             // Set flag in status register. Flag is always 1 on correct bit location. Example (0b01000000)
                                     // Doing an OR operation with flag will always set the flag.
     }else{
@@ -1097,7 +1096,6 @@ uint8_t Px6502CPU::SBC(){
     setFlag(V, (fethedDataSignBit == accumulatorSignBit) and (tempDataSignBit != accumulatorSignBit));
 
     setFlag(C, temp < (a + fethced_data));
-    std::cout << (int)(a) << " + " << (int) fethced_data << " = " << (int) ((int8_t)temp) << std::endl;
     a = temp;
 
     setFlag(N, (a & 0b10000000) > 0);
